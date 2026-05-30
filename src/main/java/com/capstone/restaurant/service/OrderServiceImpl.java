@@ -11,6 +11,7 @@ import com.capstone.restaurant.repository.CustomerRepository;
 import com.capstone.restaurant.repository.MenuItemRepository;
 import com.capstone.restaurant.repository.OrderRepository;
 import org.springframework.stereotype.Service;
+import com.capstone.restaurant.state.OrderStateFactory;
 
 import java.util.List;
 
@@ -20,15 +21,18 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
     private final MenuItemRepository menuItemRepository;
+    private final OrderStateFactory orderStateFactory;
 
     public OrderServiceImpl(
             OrderRepository orderRepository,
             CustomerRepository customerRepository,
-            MenuItemRepository menuItemRepository
+            MenuItemRepository menuItemRepository,
+            OrderStateFactory orderStateFactory
     ) {
         this.orderRepository = orderRepository;
         this.customerRepository = customerRepository;
         this.menuItemRepository = menuItemRepository;
+        this.orderStateFactory = orderStateFactory;
     }
 
     @Override
@@ -91,15 +95,13 @@ public class OrderServiceImpl implements OrderService {
     }
     @Override
     public OrderResponse updateOrderStatus(Long id) {
+
         Order order = orderRepository.findById(id)
                 .orElseThrow();
 
-        switch (order.getStatus()) {
-            case RECEIVED -> order.updateStatus(com.capstone.restaurant.entity.OrderStatus.PREPARING);
-            case PREPARING -> order.updateStatus(com.capstone.restaurant.entity.OrderStatus.READY);
-            case READY -> order.updateStatus(com.capstone.restaurant.entity.OrderStatus.DELIVERED);
-            case DELIVERED -> throw new IllegalStateException("Order is already delivered");
-        }
+        orderStateFactory
+                .getState(order.getStatus())
+                .moveToNextStatus(order);
 
         Order savedOrder = orderRepository.save(order);
 

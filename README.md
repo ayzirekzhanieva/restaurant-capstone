@@ -149,6 +149,29 @@ RECEIVED → PREPARING → READY → DELIVERED
 * Централизованное создание объектов
 * Снижение связности между компонентами
 
+### State Pattern
+
+Используется для управления жизненным циклом заказа.
+
+Классы:
+
+- OrderState
+- ReceivedState
+- PreparingState
+- ReadyState
+- DeliveredState
+- OrderStateFactory
+
+Переходы статуса:
+
+RECEIVED → PREPARING → READY → DELIVERED
+
+Преимущества:
+
+- Убирает сложный switch-case из Service Layer
+- Каждое состояние отвечает за своё поведение
+- Легко добавить новый статус заказа без переписывания бизнес-логики
+
 ---
 
 ## REST API
